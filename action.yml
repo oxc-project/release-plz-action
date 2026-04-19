@@ -62,7 +62,7 @@ runs:
   using: "composite"
   steps:
     - name: Install binaries
-      uses: taiki-e/install-action@8ea32481661d5e04d602f215b94f17e4014b44f9 # 2.61.9
+      uses: taiki-e/install-action@8ea32481661d5e04d602f215b94f17e4014b44f9 # v2.61.9
       with:
         tool: cargo-semver-checks@0.43, release-plz@${{ inputs.version }}
     - name: Configure git user from GitHub token
@@ -70,65 +70,75 @@ runs:
     - name: Run release-plz
       id: release-plz
       shell: bash
+      env:
+        CONFIG_INPUT: ${{ inputs.config }}
+        VERBOSE_INPUT: ${{ inputs.verbose }}
+        TOKEN_INPUT: ${{ inputs.token }}
+        FORGE_INPUT: ${{ inputs.forge }}
+        BACKEND_INPUT: ${{ inputs.backend }}
+        REGISTRY_INPUT: ${{ inputs.registry }}
+        MANIFEST_PATH_INPUT: ${{ inputs.manifest_path }}
+        PROJECT_MANIFEST_INPUT: ${{ inputs.project_manifest }}
+        COMMAND_INPUT: ${{ inputs.command }}
       run: |
-        if [[ -n "${{ inputs.config }}" ]]
+        if [[ -n "$CONFIG_INPUT" ]]
         then
-            echo "using config from '${{ inputs.config }}'"
+            echo "using config from '$CONFIG_INPUT'"
             # Use arrays so that inputs can contain spaces
-            CONFIG_PATH=("--config" "${{ inputs.config }}")
+            CONFIG_PATH=("--config" "$CONFIG_INPUT")
         else
             CONFIG_PATH=()
         fi
 
-        if [[ -n "${{ inputs.verbose }}" ]]
+        if [[ -n "$VERBOSE_INPUT" ]]
         then
             VERBOSE=("-v")
         else
             VERBOSE=()
         fi
 
-        if [[ -n "${{ inputs.token }}" ]]
+        if [[ -n "$TOKEN_INPUT" ]]
         then
             echo "using custom registry token'"
-            TOKEN=("--token" "${{ inputs.token }}")
+            TOKEN=("--token" "$TOKEN_INPUT")
         else
             TOKEN=()
         fi
 
-        if [[ -n "${{ inputs.forge }}" ]]
+        if [[ -n "$FORGE_INPUT" ]]
         then
-          echo "Using forge '${{ inputs.forge }}'"
-          FORGE=("--forge" "${{ inputs.forge }}")
-        elif [[ -n "${{ inputs.backend }}" ]]
+          echo "Using forge '$FORGE_INPUT'"
+          FORGE=("--forge" "$FORGE_INPUT")
+        elif [[ -n "$BACKEND_INPUT" ]]
         then
           echo "'backend' input is supported for backward compatibility. Use 'forge' instead."
-          echo "Using backend '${{ inputs.backend }}'"
-          FORGE=("--forge" "${{ inputs.backend }}")
+          echo "Using backend '$BACKEND_INPUT'"
+          FORGE=("--forge" "$BACKEND_INPUT")
         else
           FORGE=()
         fi
 
-        if [[ -n "${{ inputs.registry }}" ]]
+        if [[ -n "$REGISTRY_INPUT" ]]
         then
-            echo "using registry '${{ inputs.registry }}'"
-            ALT_REGISTRY=("--registry" "${{ inputs.registry }}")
+            echo "using registry '$REGISTRY_INPUT'"
+            ALT_REGISTRY=("--registry" "$REGISTRY_INPUT")
         else
             ALT_REGISTRY=()
         fi
 
-        if [[ -n "${{ inputs.manifest_path }}" ]]
+        if [[ -n "$MANIFEST_PATH_INPUT" ]]
         then
-            echo "using manifest path '${{ inputs.manifest_path }}'"
-            MANIFEST_PATH=("--manifest-path" "${{ inputs.manifest_path }}")
-        elif [[ -n "${{ inputs.project_manifest }}" ]]
+            echo "using manifest path '$MANIFEST_PATH_INPUT'"
+            MANIFEST_PATH=("--manifest-path" "$MANIFEST_PATH_INPUT")
+        elif [[ -n "$PROJECT_MANIFEST_INPUT" ]]
         then
-            echo "using manifest path '${{ inputs.project_manifest }}'"
-            MANIFEST_PATH=("--project-manifest" "${{ inputs.project_manifest }}")
+            echo "using manifest path '$PROJECT_MANIFEST_INPUT'"
+            MANIFEST_PATH=("--project-manifest" "$PROJECT_MANIFEST_INPUT")
         else
             MANIFEST_PATH=()
         fi
 
-        if [[ -z "${{ inputs.command }}" || "${{ inputs.command }}" == "release-pr" ]]
+        if [[ -z "$COMMAND_INPUT" || "$COMMAND_INPUT" == "release-pr" ]]
         then
             echo "-- Running release-plz release-pr --"
             release_pr_output=$(release-plz release-pr\
@@ -155,7 +165,7 @@ runs:
             echo "prs_created=$prs_created" >> "$GITHUB_OUTPUT"
         fi
 
-        if [[ -z "${{ inputs.command }}" || "${{ inputs.command }}" == "release" ]]
+        if [[ -z "$COMMAND_INPUT" || "$COMMAND_INPUT" == "release" ]]
         then
             echo "-- Running release-plz release --"
             release_output=$(release-plz release\
