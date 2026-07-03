@@ -32,17 +32,14 @@ pub fn latest_release(repo: &str) -> String {
     let last_tag = String::from_utf8(last_tag.stdout).unwrap();
     let last_tag = last_tag.trim();
     println!("latest tag: {repo}: `{}`", last_tag);
-    last_tag
-        .split_whitespace()
-        .next()
-        .unwrap()
-        .trim_start_matches("release-plz-v")
-        .to_string()
+    last_tag.split_whitespace().next().unwrap().trim_start_matches("release-plz-v").to_string()
 }
 
 fn verify_release_plz_tag(release_plz_tag: &str) {
     if !release_plz_tag.starts_with("0.3") {
-        panic!("latest tag `{release_plz_tag}` is not a release-plz tag. Probably you just need to wait until the release is published");
+        panic!(
+            "latest tag `{release_plz_tag}` is not a release-plz tag. Probably you just need to wait until the release is published"
+        );
     }
     let release_plz_tag = format!("release-plz-v{}", release_plz_tag);
     // run: gh release view {tag} --repo release-plz/release-plz --json assets --jq '.assets | length'
@@ -64,7 +61,9 @@ fn verify_release_plz_tag(release_plz_tag: &str) {
     let expected_assets = "11";
     let out = out.trim();
     if out != expected_assets {
-        println!("release-plz tag `{release_plz_tag}` does not have {expected_assets} assets, it has {out} instead. Either:\n- you need to wait until the binaries are published\n- one binary failed to compile");
+        println!(
+            "release-plz tag `{release_plz_tag}` does not have {expected_assets} assets, it has {out} instead. Either:\n- you need to wait until the binaries are published\n- one binary failed to compile"
+        );
         println!(">>> Press enter to continue or Ctrl+C to abort <<<");
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
